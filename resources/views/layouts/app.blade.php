@@ -157,6 +157,20 @@
 @if (session('gagal'))<div data-toast="gagal" data-msg="{{ session('gagal') }}"></div>@endif
 @if (session('info'))<div data-toast="info" data-msg="{{ session('info') }}"></div>@endif
 
+{{-- Pratinjau berkas (PDF / gambar) di dalam halaman — dipakai semua halaman lewat [data-preview] --}}
+<div class="modal-overlay preview-overlay" id="modalPratinjau" hidden>
+    <div class="modal modal-preview" role="dialog" aria-modal="true" aria-label="Pratinjau berkas">
+        <div class="modal-head">
+            <h3><x-icon name="eye"/> <span data-pv-title>Pratinjau berkas</span></h3>
+            <div class="pv-actions">
+                <a href="#" class="btn btn-outline btn-sm" data-pv-download><x-icon name="download"/> Unduh</a>
+                <button type="button" class="icon-btn" data-modal-close aria-label="Tutup pratinjau"><x-icon name="x"/></button>
+            </div>
+        </div>
+        <div class="pv-body" data-pv-body></div>
+    </div>
+</div>
+
 <script src="{{ asset('js/app.js') }}"></script>
 @stack('scripts')
 </body>

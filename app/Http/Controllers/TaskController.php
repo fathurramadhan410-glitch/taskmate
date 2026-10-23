@@ -92,10 +92,28 @@ class TaskController extends Controller
         $role = user_role_in($workspace->id_workspace);
         $task->load(['penanggungJawab:id_user,nama,avatar', 'pembuat:id_user,nama']);
         $logs = $task->logs()->with('user:id_user,nama')->orderByDesc('id_log')->limit(20)->get();
-        $files = $task->files()->with(['versions.uploader:id_user,nama', 'pembuat:id_user,nama'])->orderByDesc('id_file')->get();
-        $moves = kanban_moves($task, $role, $request->user()->id_user);
+                $userId = $request->user()->id_user;
 
-        return view('kanban._detail', compact('task', 'logs', 'files', 'role', 'moves', 'workspace'));
+        // Draf / berkas pekerjaan yang dikaitkan dengan tugas ini
+        $files = $task->files()->draf()
+            ->with(['versions.uploader:id_user,nama', 'pembuat:id_user,nama'])
+            ->orderByDesc('id_file')->get();
+
+        // Materi & referensi dari Project Leader: yang dikaitkan ke tugas ini
+        // (ditampilkan lebih dulu) ditambah materi umum workspace.
+        $materi = $workspace->files()->materi()
+            ->where(fn ($q) => $q->where('id_task', $task->id_task)->orWhereNull('id_task'))
+            ->with(['versions.uploader:id_user,nama', 'pembuat:id_user,nama'])
+            ->orderByRaw('id_task IS NULL')
+            ->orderByDesc('id_file')->get();
+
+        $moves = kanban_moves($task, $role, $userId);
+
+        // Leader & penanggung jawab tugas boleh mengunggah draf untuk tugas ini
+        $bisaUnggah = $role === 'leader' || (int) $task->id_penanggung_jawab === (int) $userId;
+
+        return view('kanban._detail', compact('task', 'logs', 'files', 'materi', 'role', 'moves', 'workspace', 'bisaUnggah'));
+        
     }
 
     /** Data JSON untuk mengisi form edit tugas (dipakai kanban.js) */

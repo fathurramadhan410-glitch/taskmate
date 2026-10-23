@@ -209,4 +209,18 @@ if (! function_exists('file_icon')) {
             default => 'doc',
         };
     }
+
+
+if (! function_exists('preview_type')) {
+    /** Jenis pratinjau bawaan untuk sebuah ekstensi: 'pdf' | 'image' | null */
+    function preview_type(string $ext): ?string
+    {
+        return match (strtolower($ext)) {
+            'pdf' => 'pdf',
+            'png', 'jpg', 'jpeg' => 'image',
+            default => null,
+        };
+    }
+}
+
 }

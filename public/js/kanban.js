@@ -10,38 +10,51 @@
     var board = document.getElementById('kanbanBoard');
     if (!board) return;
 
-    var wsId = board.getAttribute('data-workspace');
+        var wsId = board.getAttribute('data-workspace');
     var storageKey = 'tm_kanban_open_' + wsId;
+    var SEMUA = ['todo', 'in_progress', 'review', 'done'];
 
     var chips = document.querySelectorAll('[data-kolom].k-chip');
     var cols = board.querySelectorAll('.kanban-col[data-kolom]');
+    var toggleSemua = document.getElementById('toggleSemua');
+    var toggleLabel = document.getElementById('toggleSemuaLabel');
 
-    /* ---------- Simpan / muat kolom yang terbuka ---------- */
+    /* ---------- Simpan / muat kolom yang terbuka ----------
+       Disimpan di sessionStorage; bila browser memblokirnya, status tetap
+       bekerja selama halaman terbuka (cadangan di memori). */
+    var memori = [];
+
     function getOpen() {
-        try { return JSON.parse(sessionStorage.getItem(storageKey) || '[]'); }
-        catch (e) { return []; }
+        var arr = memori;
+        try {
+            var raw = sessionStorage.getItem(storageKey);
+            if (raw !== null) arr = JSON.parse(raw);
+        } catch (e) { /* pakai memori */ }
+        return Array.isArray(arr) ? arr.filter(function (k) { return SEMUA.indexOf(k) !== -1; }) : [];
     }
 
     function setOpen(arr) {
-        sessionStorage.setItem(storageKey, JSON.stringify(arr));
+        memori = arr;
+        try { sessionStorage.setItem(storageKey, JSON.stringify(arr)); } catch (e) { /* abaikan */ }
     }
 
     function applyOpen() {
         var open = getOpen();
+
         cols.forEach(function (col) {
-            var key = col.getAttribute('data-kolom');
-            var show = open.indexOf(key) !== -1;
-            col.hidden = !show;
+            var tampil = open.indexOf(col.getAttribute('data-kolom')) !== -1;
+            col.hidden = !tampil;
         });
+
         chips.forEach(function (chip) {
-            var key = chip.getAttribute('data-kolom');
-            chip.classList.toggle('open', open.indexOf(key) !== -1);
+            var tampil = open.indexOf(chip.getAttribute('data-kolom')) !== -1;
+            chip.classList.toggle('open', tampil);
+            chip.setAttribute('aria-expanded', tampil ? 'true' : 'false');
         });
-        var semua = document.getElementById('toggleSemua');
-        if (semua) {
-            semua.innerHTML = open.length === 4
-                ? 'Sembunyikan Semua'
-                : 'Tampilkan Semua';
+
+        var semuaTerbuka = open.length === SEMUA.length;
+        if (toggleLabel) {
+            toggleLabel.textContent = semuaTerbuka ? 'Sembunyikan Semua' : 'Tampilkan Semua';
         }
     }
 
@@ -66,16 +79,17 @@
         });
     });
 
-    // Tampilkan/sembunyikan semua sekaligus
-    var toggleSemua = document.getElementById('toggleSemua');
+    // Tampilkan / sembunyikan semua sekaligus
     if (toggleSemua) {
         toggleSemua.addEventListener('click', function () {
-            setOpen(getOpen().length === 4 ? [] : ['todo', 'in_progress', 'review', 'done']);
+            setOpen(getOpen().length === SEMUA.length ? [] : SEMUA.slice());
             applyOpen();
         });
     }
 
     applyOpen();
+
+    
 
     /* ---------- Pencarian cepat di sisi klien ---------- */
     var searchInput = document.querySelector('#filterForm input[name="q"]');

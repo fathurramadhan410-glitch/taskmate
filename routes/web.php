@@ -78,6 +78,7 @@ Route::middleware('auth')->group(function () {
         // Repository & berkas
         Route::get('/repository', [RepositoryController::class, 'index'])->name('repository.index');
         Route::post('/repository', [RepositoryController::class, 'upload'])->name('repository.upload');
+        Route::post('/repository/materi', [RepositoryController::class, 'uploadMateri'])->name('repository.materi');
         Route::delete('/berkas/{file}', [RepositoryController::class, 'destroy'])->name('berkas.hapus');
 
         // Chat realtime

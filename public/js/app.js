@@ -93,6 +93,72 @@
         }
     });
 
+        /* ---------- Pratinjau berkas (PDF / gambar) di dalam halaman ----------
+       Elemen apa pun dengan atribut data-preview="URL" membuka modal pratinjau
+       tanpa pindah halaman atau membuka tab baru. Atribut pendukung:
+       data-preview-tipe (pdf|image), data-preview-nama, data-preview-unduh. */
+    var pvOverlay = document.getElementById('modalPratinjau');
+
+    if (pvOverlay) {
+        var pvTitle = pvOverlay.querySelector('[data-pv-title]');
+        var pvBody = pvOverlay.querySelector('[data-pv-body]');
+        var pvDownload = pvOverlay.querySelector('[data-pv-download]');
+
+        window.tmPreview = function (opt) {
+            pvBody.innerHTML = '';
+            pvTitle.textContent = opt.nama || 'Pratinjau berkas';
+
+            if (opt.unduh) {
+                pvDownload.href = opt.unduh;
+                pvDownload.hidden = false;
+            } else {
+                pvDownload.hidden = true;
+            }
+
+            if (opt.tipe === 'image') {
+                var img = document.createElement('img');
+                img.src = opt.url;
+                img.alt = opt.nama || 'Pratinjau gambar';
+                pvBody.appendChild(img);
+            } else {
+                var frame = document.createElement('iframe');
+                frame.src = opt.url + '#view=FitH';
+                frame.title = opt.nama || 'Pratinjau PDF';
+                pvBody.appendChild(frame);
+            }
+
+            window.tmOpenModal('modalPratinjau');
+        };
+
+        document.addEventListener('click', function (e) {
+            var trigger = e.target.closest('[data-preview]');
+            if (!trigger) return;
+            e.preventDefault();
+            window.tmPreview({
+                url: trigger.getAttribute('data-preview'),
+                tipe: trigger.getAttribute('data-preview-tipe'),
+                nama: trigger.getAttribute('data-preview-nama'),
+                unduh: trigger.getAttribute('data-preview-unduh')
+            });
+        });
+
+        // Escape menutup pratinjau saja (modal di bawahnya, mis. detail tugas, tetap terbuka)
+        window.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !pvOverlay.hidden) {
+                e.stopPropagation();
+                pvOverlay.hidden = true;
+            }
+        }, true);
+
+        // Setiap kali pratinjau ditutup (tombol, klik latar, atau Escape):
+        // hentikan pemuatan berkas & pertahankan kunci scroll bila modal lain masih terbuka.
+        new MutationObserver(function () {
+            if (!pvOverlay.hidden) return;
+            pvBody.innerHTML = '';
+            document.body.style.overflow = document.querySelector('.modal-overlay:not([hidden])') ? 'hidden' : '';
+        }).observe(pvOverlay, { attributes: true, attributeFilter: ['hidden'] });
+    }
+
     /* ---------- Dropdown ---------- */
     document.addEventListener('click', function (e) {
         var toggle = e.target.closest('[data-dropdown-toggle]');

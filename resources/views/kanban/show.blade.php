@@ -13,7 +13,7 @@
     </div>
     <div class="toolbar-right">
         <button type="button" class="btn btn-ghost" id="toggleSemua" title="Tampilkan atau sembunyikan semua kolom status">
-            <x-icon name="board"/> Tampilkan Semua
+            <x-icon name="board"/> <span id="toggleSemuaLabel">Tampilkan Semua</span>
         </button>
         @if ($role === 'leader')
             <button type="button" class="btn btn-primary" data-modal-open="modalTugas">
@@ -50,7 +50,7 @@
     <p class="kanban-hint"><x-icon name="info"/> Klik sebuah status untuk melihat kartu tugas di dalamnya — status yang tidak diklik tetap tersembunyi.</p>
     <div class="chips-row">
         @foreach ($statuses as $key => $meta)
-            <button type="button" class="k-chip chip-{{ $key }}" data-kolom="{{ $key }}">
+            <button type="button" class="k-chip chip-{{ $key }}" data-kolom="{{ $key }}" aria-expanded="false"></button>
                 <span class="k-dot"></span>
                 {{ $meta['label'] }}
                 <b class="k-count">{{ $counts[$key] ?? 0 }}</b>

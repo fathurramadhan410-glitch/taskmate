@@ -63,30 +63,42 @@
         </div>
     @endif
 
-    {{-- Berkas terkait --}}
+        {{-- Draf / berkas tugas --}}
     <div class="td-section">
-        <h4>Berkas Draf Terkait ({{ $files->count() }})</h4>
+        <div class="td-section-head">
+            <h4>Draf &amp; Berkas Tugas ({{ $files->count() }})</h4>
+            @if ($bisaUnggah)
+                <a href="{{ route('repository.index', [$workspace, 'tugas' => $task->id_task, 'unggah' => 1]) }}" class="btn btn-outline btn-sm">
+                    <x-icon name="upload"/> Unggah Draf
+                </a>
+            @endif
+        </div>
         @if ($files->count() > 0)
             <ul class="td-files">
                 @foreach ($files as $f)
-                    @php($v = $f->versiTerbaru())
-                    <li>
-                        <span class="td-file-icon"><x-icon name="{{ file_icon($f->ekstensi()) }}"/></span>
-                        <div class="td-file-info">
-                            <b>{{ $f->nama_file }}</b>
-                            <small>v{{ $v?->nomor_versi ?? '-' }} · {{ format_bytes($v?->ukuran_byte) }} · oleh {{ $v?->uploader?->nama ?? '-' }}</small>
-                        </div>
-                        @if ($v)
-                            <a href="{{ route('berkas.unduh', $v) }}" class="icon-btn" title="Unduh versi terbaru"><x-icon name="download"/></a>
-                            @if (in_array($f->ekstensi(), ['pdf', 'png', 'jpg', 'jpeg']))
-                                <a href="{{ route('berkas.pratinjau', $v) }}" target="_blank" class="icon-btn" title="Pratinjau"><x-icon name="eye"/></a>
-                            @endif
-                        @endif
-                    </li>
+                    @include('kanban._berkas_item', ['f' => $f])
                 @endforeach
             </ul>
         @else
-            <p class="muted">Belum ada berkas yang dikaitkan dengan tugas ini. Unggah melalui menu Repository dan pilih tugas ini pada kolom "Tugas terkait".</p>
+            <p class="muted">Belum ada draf yang dikaitkan dengan tugas ini.
+                @if ($bisaUnggah) Unggah melalui menu Repository, lalu pilih tugas ini pada kolom "Tugas terkait". @endif
+            </p>
+        @endif
+    </div>
+
+    {{-- Materi & referensi (diunggah Project Leader) --}}
+    <div class="td-section">
+        <div class="td-section-head">
+            <h4>Materi &amp; Referensi ({{ $materi->count() }})</h4>
+        </div>
+        @if ($materi->count() > 0)
+            <ul class="td-files">
+                @foreach ($materi as $f)
+                    @include('kanban._berkas_item', ['f' => $f, 'tandaiUmum' => true])
+                @endforeach
+            </ul>
+        @else
+            <p class="muted">Belum ada materi atau referensi dari Project Leader.</p>
         @endif
     </div>
 

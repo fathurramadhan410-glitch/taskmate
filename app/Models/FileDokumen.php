@@ -6,11 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class FileDokumen extends Model
 {
+    /** Berkas pekerjaan tugas (draf) */
+    public const KATEGORI_DRAF = 'draf';
+
+    /** Materi / referensi — hanya diunggah Project Leader */
+    public const KATEGORI_MATERI = 'materi';
+
     protected $primaryKey = 'id_file';
 
     protected $fillable = [
         'id_workspace',
         'id_task',
+        'kategori',
         'nama_file',
         'dibuat_oleh',
     ];
@@ -42,7 +49,24 @@ class FileDokumen extends Model
         return $this->hasMany(FileVersion::class, 'id_file', 'id_file')->orderByDesc('nomor_versi');
     }
 
+    /* ============================ SCOPE ============================= */
+
+    public function scopeDraf($query)
+    {
+        return $query->where('kategori', self::KATEGORI_DRAF);
+    }
+
+    public function scopeMateri($query)
+    {
+        return $query->where('kategori', self::KATEGORI_MATERI);
+    }
+
     /* =========================== HELPER ============================= */
+
+    public function isMateri(): bool
+    {
+        return $this->kategori === self::KATEGORI_MATERI;
+    }
 
     public function versiTerbaru(): ?FileVersion
     {
@@ -52,5 +76,11 @@ class FileDokumen extends Model
     public function ekstensi(): string
     {
         return strtolower(pathinfo($this->nama_file, PATHINFO_EXTENSION));
+    }
+
+    /** 'pdf' | 'image' | null (null = format tidak mendukung pratinjau) */
+    public function tipePratinjau(): ?string
+    {
+        return preview_type($this->ekstensi());
     }
 }
