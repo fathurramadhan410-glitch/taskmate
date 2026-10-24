@@ -1337,3 +1337,33 @@
 .versi-info { flex: 1; min-width: 0; }
 .versi-info b { display: block; font-size: 13px; }
 .versi-info small { color: var(--soft); font-size: 11.5px; }
+
+/* ===== Warna status Kanban (To-Do, In Progress, Review, Done) ===== */
+.chip-todo, .kanban-col[data-kolom="todo"] {
+    --st: #64748B; --st-text: #475569; --st-bg: #EEF2F7; --st-soft: #F6F8FB; --st-line: #CBD5E1; --st-ring: rgba(100, 116, 139, .18);
+}
+.chip-in_progress, .kanban-col[data-kolom="in_progress"] {
+    --st: #2F80ED; --st-text: #1D5FBF; --st-bg: #E6F0FE; --st-soft: #F3F8FF; --st-line: #B7D3FB; --st-ring: rgba(47, 128, 237, .18);
+}
+.chip-review, .kanban-col[data-kolom="review"] {
+    --st: #8B5CF6; --st-text: #6D3FD6; --st-bg: #EEE9FD; --st-soft: #F8F6FF; --st-line: #D2C5FA; --st-ring: rgba(139, 92, 246, .18);
+}
+.chip-done, .kanban-col[data-kolom="done"] {
+    --st: #10B981; --st-text: #047857; --st-bg: #DCF5EA; --st-soft: #F1FBF6; --st-line: #A6E2C8; --st-ring: rgba(16, 185, 129, .18);
+}
+
+/* Chip status */
+.k-chip { background: var(--st-bg); border-color: var(--st-line); color: var(--st-text); }
+.k-chip .k-dot { width: 10px; height: 10px; background: var(--st); }
+.k-chip .k-count { background: var(--st); color: #fff; }
+.k-chip .k-chev { color: var(--st); }
+.k-chip:hover { border-color: var(--st); }
+.k-chip.open { background: var(--st-bg); border-color: var(--st); box-shadow: 0 0 0 3px var(--st-ring); }
+
+/* Kolom status */
+.kanban-col { background: var(--st-soft); border-color: var(--st-line); border-top: 4px solid var(--st); }
+.kc-head { background: var(--st-bg); border-bottom-color: var(--st-line); }
+.kc-head .kc-title { color: var(--st-text); }
+.kc-head .k-dot { background: var(--st); }
+.kc-head .kc-count { background: var(--st); color: #fff; }
+.kanban-col .task-card { border-top: 3px solid var(--st); }

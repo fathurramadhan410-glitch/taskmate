@@ -6,7 +6,9 @@ use App\Models\FileDokumen;
 use App\Models\FileVersion;
 use App\Models\Task;
 use App\Models\Workspace;
+use App\Models\WorkspaceMember;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -15,7 +17,8 @@ use Illuminate\Support\Str;
  *
  * Isi repository terbagi dua kategori:
  *  - Draf Tugas         : diunggah anggota (Member hanya untuk tugas miliknya) atau leader.
- *  - Materi & Referensi : HANYA diunggah Project Leader, dapat dibaca semua anggota.
+ *  - Materi & Referensi : HANYA diunggah Project Leader, terkait ke WORKSPACE,
+ *                         dapat dilihat & diunduh semua anggota, hanya leader yang dapat menghapus.
  *
  * - Berkas disimpan pada disk privat (storage/app/private) sehingga hanya
  *   bisa diunduh/pratinjau oleh anggota workspace melalui controller.
@@ -54,8 +57,12 @@ class RepositoryController extends Controller
         }
         $tugasDraf = $tugasQuery->get(['id_task', 'judul', 'id_penanggung_jawab']);
 
-        // Materi boleh dikaitkan ke tugas mana pun (hanya dipakai leader)
-        $tugasMateri = $isLeader ? $tugasDraf : collect();
+        // Pilihan "Workspace Terkait" pada unggah materi: workspace yang dipimpin pengguna
+        $workspaceLeader = $isLeader
+            ? Workspace::whereIn('id_workspace', WorkspaceMember::where('id_user', $userId)->where('peran', 'leader')->select('id_workspace'))
+                ->orderBy('nama_workspace')
+                ->get(['id_workspace', 'nama_workspace'])
+            : collect();
 
         // Tautan "Unggah draf" dari detail tugas: pilih tugasnya & buka formulir
         $tugasDipilih = (int) $request->query('tugas');
@@ -67,7 +74,7 @@ class RepositoryController extends Controller
 
         return view('repository.index', compact(
             'workspace', 'role', 'drafs', 'materi', 'totalUkuran', 'totalVersi',
-            'tugasDraf', 'tugasMateri', 'tugasDipilih', 'tab'
+            'tugasDraf', 'workspaceLeader', 'tugasDipilih', 'tab'
         ));
     }
 
@@ -104,28 +111,28 @@ class RepositoryController extends Controller
         );
     }
 
-    /** Materi & referensi: hanya Project Leader */
+    /** Materi & referensi: hanya Project Leader. Materi terkait ke WORKSPACE (bukan ke tugas). */
     public function uploadMateri(Request $request, Workspace $workspace)
     {
         abort_unless(is_leader_in($workspace->id_workspace), 403,
             'Hanya Project Leader yang dapat mengunggah materi / referensi.');
 
-        $data = $request->validateWithBag('materi', $this->aturanBerkas(), $this->pesanBerkas());
+        $data = $request->validateWithBag(
+            'materi',
+            Arr::except($this->aturanBerkas(), 'id_task') + ['id_workspace' => ['required', 'integer']],
+            $this->pesanBerkas()
+        );
 
-        $idTask = null;
-        if ($request->filled('id_task')) {
-            $tugas = $workspace->tasks()->whereKey((int) $request->input('id_task'))->first();
-
-            if (! $tugas) {
-                return back()->withInput()->withErrors(
-                    ['id_task' => 'Tugas tidak ditemukan pada workspace ini.'], 'materi'
-                );
-            }
-            $idTask = $tugas->id_task;
+        // Workspace tujuan harus workspace yang dipimpin pengguna ini
+        $tujuan = Workspace::find((int) $data['id_workspace']);
+        if (! $tujuan || ! is_leader_in($tujuan->id_workspace)) {
+            return back()->withInput()->withErrors(
+                ['id_workspace' => 'Anda hanya dapat mengunggah materi ke workspace yang Anda pimpin.'], 'materi'
+            );
         }
 
         return $this->simpan(
-            $request, $workspace, FileDokumen::KATEGORI_MATERI, $idTask,
+            $request, $tujuan, FileDokumen::KATEGORI_MATERI, null,
             $data['catatan_revisi'] ?? null, true
         );
     }
@@ -166,7 +173,7 @@ class RepositoryController extends Controller
         ]);
     }
 
-    /** FR-020: menghapus berkas beserta seluruh versinya (Project Leader) */
+    /** FR-020: menghapus berkas beserta seluruh versinya (hanya Project Leader) */
     public function destroy(Request $request, Workspace $workspace, FileDokumen $file)
     {
         abort_unless(is_leader_in($workspace->id_workspace), 403, 'Hanya Project Leader yang dapat menghapus berkas.');
@@ -209,6 +216,7 @@ class RepositoryController extends Controller
 
         return [
             'berkas.required' => 'Pilih berkas yang akan diunggah.',
+            'id_workspace.required' => 'Pilih workspace tujuan materi.',
             'berkas.max' => 'Ukuran berkas melebihi batas maksimal '.$maksMb.' MB.',
             'berkas.mimes' => 'Format berkas tidak didukung. Gunakan: PDF, DOC/DOCX, PPT/PPTX, XLS/XLSX, TXT, ZIP, PNG, atau JPG.',
             'berkas.uploaded' => 'Unggahan gagal. Periksa ukuran berkas dan pengaturan server (php.ini).',

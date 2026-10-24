@@ -11,26 +11,46 @@
 
     window.tmCsrf = CSRF;
 
-    /* ---------- Ikon kecil untuk toast (diambil dari komponen server-side
-       tidak memungkinkan, jadi pakai karakter sederhana) ---------- */
+    /* ---------- Ikon animasi untuk toast (SVG digambar bertahap lewat CSS) ---------- */
+    var TOAST_JUDUL = { sukses: 'Berhasil', gagal: 'Gagal', info: 'Informasi' };
+
     function toastIcon(type) {
-        return type === 'sukses' ? '✓' : (type === 'gagal' ? '✕' : 'i');
+        var ring = '<circle class="ti-ring" cx="26" cy="26" r="23"/>';
+        var mark;
+
+        if (type === 'sukses') {
+            mark = '<path class="ti-mark" d="M15 27 l7 7 l15 -16"/>';
+        } else if (type === 'gagal') {
+            mark = '<path class="ti-mark" d="M18 18 L34 34"/><path class="ti-mark ti-mark-2" d="M34 18 L18 34"/>';
+        } else {
+            mark = '<path class="ti-mark" d="M26 25 v11"/><path class="ti-dot" d="M26 17.5 h.01"/>';
+        }
+
+        return '<svg viewBox="0 0 52 52" aria-hidden="true" focusable="false">' + ring + mark + '</svg>';
     }
 
-    /* ---------- Toast ---------- */
+    /* ---------- Toast (muncul di kanan atas) ---------- */
     window.tmToast = function (pesan, type) {
-        type = type || 'info';
+        type = TOAST_JUDUL[type] ? type : 'info';
+        var durasi = type === 'gagal' ? 7000 : 5000;
+
         var wrap = document.querySelector('.toast-wrap');
         if (!wrap) {
             wrap = document.createElement('div');
             wrap.className = 'toast-wrap';
             document.body.appendChild(wrap);
         }
+
         var el = document.createElement('div');
         el.className = 'toast t-' + type;
-        el.innerHTML = '<span class="toast-icon"><strong>' + toastIcon(type) + '</strong></span>' +
-            '<span class="toast-msg"></span>' +
-            '<button type="button" class="toast-close" aria-label="Tutup">✕</button>';
+        el.setAttribute('role', type === 'gagal' ? 'alert' : 'status');
+        el.style.setProperty('--dur', durasi + 'ms');
+        el.innerHTML =
+            '<span class="toast-icon">' + toastIcon(type) + '</span>' +
+            '<div class="toast-text"><strong class="toast-title">' + TOAST_JUDUL[type] + '</strong>' +
+            '<span class="toast-msg"></span></div>' +
+            '<button type="button" class="toast-close" aria-label="Tutup">✕</button>' +
+            '<span class="toast-bar"></span>';
         el.querySelector('.toast-msg').textContent = pesan;
         wrap.appendChild(el);
 
@@ -41,7 +61,7 @@
             setTimeout(function () { el.remove(); }, 260);
         }
         el.querySelector('.toast-close').addEventListener('click', close);
-        setTimeout(close, 5000);
+        setTimeout(close, durasi);
     };
 
     /* ---------- Modal ---------- */
@@ -93,7 +113,7 @@
         }
     });
 
-        /* ---------- Pratinjau berkas (PDF / gambar) di dalam halaman ----------
+    /* ---------- Pratinjau berkas (PDF / gambar) di dalam halaman ----------
        Elemen apa pun dengan atribut data-preview="URL" membuka modal pratinjau
        tanpa pindah halaman atau membuka tab baru. Atribut pendukung:
        data-preview-tipe (pdf|image), data-preview-nama, data-preview-unduh. */

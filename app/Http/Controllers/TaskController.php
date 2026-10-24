@@ -101,10 +101,8 @@ class TaskController extends Controller
 
         // Materi & referensi dari Project Leader: yang dikaitkan ke tugas ini
         // (ditampilkan lebih dulu) ditambah materi umum workspace.
-        $materi = $workspace->files()->materi()
-            ->where(fn ($q) => $q->where('id_task', $task->id_task)->orWhereNull('id_task'))
+       $materi = $workspace->files()->materi()
             ->with(['versions.uploader:id_user,nama', 'pembuat:id_user,nama'])
-            ->orderByRaw('id_task IS NULL')
             ->orderByDesc('id_file')->get();
 
         $moves = kanban_moves($task, $role, $userId);

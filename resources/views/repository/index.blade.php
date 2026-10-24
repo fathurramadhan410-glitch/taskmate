@@ -80,6 +80,7 @@
 <div class="card" id="panelDraf" role="tabpanel" aria-labelledby="tabDraf" data-panel="draf" @if ($tabAktif !== 'draf') hidden @endif>
     @include('repository._tabel', [
         'daftar' => $drafs,
+        'jenis' => 'draf',
         'umumLabel' => '—',
         'kosongJudul' => 'Belum ada draf',
         'kosongTeks' => 'Unggah draf pertama Anda — setiap unggahan dengan nama sama akan tersimpan sebagai versi baru.',
@@ -89,10 +90,11 @@
 <div class="card" id="panelMateri" role="tabpanel" aria-labelledby="tabMateri" data-panel="materi" @if ($tabAktif !== 'materi') hidden @endif>
     @include('repository._tabel', [
         'daftar' => $materi,
-        'umumLabel' => 'Umum (semua tugas)',
+        'jenis' => 'materi',
+        'umumLabel' => '—',
         'kosongJudul' => 'Belum ada materi atau referensi',
         'kosongTeks' => $isLeader
-            ? 'Unggah materi atau referensi agar dapat dibaca seluruh anggota workspace.'
+            ? 'Unggah materi atau referensi agar dapat dilihat dan diunduh seluruh anggota workspace.'
             : 'Project Leader belum mengunggah materi atau referensi.',
     ])
 </div>
@@ -166,16 +168,15 @@
                     <p class="field-hint">Maksimal {{ round(config('taskmate.max_file_kb') / 1024) }} MB. Nama berkas yang sama disimpan sebagai versi baru.</p>
                     @if ($errMateri->has('berkas'))<p class="field-error">{{ $errMateri->first('berkas') }}</p>@endif
                 </div>
-                <div class="form-group">
-                    <label for="id_task_materi">Terkait Tugas (opsional)</label>
-                    <select id="id_task_materi" name="id_task">
-                        <option value="">— Materi umum (untuk semua tugas) —</option>
-                        @foreach ($tugasMateri as $t)
-                            <option value="{{ $t->id_task }}" @selected((string) old('id_task') === (string) $t->id_task && $errMateri->any())>{{ $t->judul }}</option>
+                                <div class="form-group">
+                    <label for="id_workspace_materi">Workspace Terkait <b>*</b></label>
+                    <select id="id_workspace_materi" name="id_workspace" required>
+                        @foreach ($workspaceLeader as $w)
+                            <option value="{{ $w->id_workspace }}" @selected((string) ($errMateri->any() ? old('id_workspace') : $workspace->id_workspace) === (string) $w->id_workspace)>{{ $w->nama_workspace }}</option>
                         @endforeach
                     </select>
-                    <p class="field-hint">Materi yang dikaitkan ke tugas akan tampil pertama pada detail tugas tersebut; materi umum tampil di semua tugas.</p>
-                    @if ($errMateri->has('id_task'))<p class="field-error">{{ $errMateri->first('id_task') }}</p>@endif
+                    <p class="field-hint">Materi tersimpan di workspace yang dipilih. Seluruh anggota workspace tersebut dapat melihat dan mengunduhnya; hanya Project Leader yang dapat menghapusnya.</p>
+                    @if ($errMateri->has('id_workspace'))<p class="field-error">{{ $errMateri->first('id_workspace') }}</p>@endif
                 </div>
                 <div class="form-group">
                     <label for="catatan_materi">Keterangan</label>

@@ -1,14 +1,15 @@
 {{--
     Tabel berkas repository. Variabel:
       $daftar (Collection<FileDokumen>), $workspace, $role,
-      $kosongJudul, $kosongTeks, $umumLabel (teks bila tidak terkait tugas)
+      $kosongJudul, $kosongTeks, $umumLabel (teks bila tidak terkait tugas),
+      $jenis ('draf' | 'materi') — materi terkait ke workspace, draf terkait ke tugas
 --}}
 <div class="table-wrap">
     <table class="table">
         <thead>
             <tr>
                 <th>Nama Berkas</th>
-                <th>Tugas Terkait</th>
+                <th>{{ $jenis === 'materi' ? 'Workspace Terkait' : 'Tugas Terkait' }}</th>
                 <th>Versi Terbaru</th>
                 <th>Ukuran</th>
                 <th>Pengunggah Terakhir</th>
@@ -31,7 +32,9 @@
                         </span>
                     </td>
                     <td>
-                        @if ($task)
+                        @if ($jenis === 'materi')
+                            <span class="muted">{{ $workspace->nama_workspace }}</span>
+                        @elseif ($task)
                             <a href="{{ route('kanban.show', $workspace) }}" class="link-soft" title="{{ $task->judul }}">{{ \Illuminate\Support\Str::limit($task->judul, 26) }}</a>
                         @else
                             <span class="muted">{{ $umumLabel }}</span>
@@ -52,6 +55,7 @@
                                     data-versi="{{ $f->id_file }}"
                                     data-nama="{{ $f->nama_file }}">{{ $f->versions->count() }}v</button>
                             @endif
+                            {{-- Tombol hapus HANYA untuk Project Leader --}}
                             @if ($role === 'leader')
                                 <button type="button" class="icon-btn icon-danger" title="Hapus berkas"
                                     data-hapus-berkas="{{ route('berkas.hapus', [$workspace, $f]) }}"
