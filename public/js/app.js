@@ -209,6 +209,45 @@
         }
     });
 
+    /* ---------- Avatar rusak: otomatis ganti dengan inisial nama ----------
+       Foto profil bisa gagal dimuat (storage:link belum dijalankan, URL Google
+       kedaluwarsa, atau berkas terhapus). Listener pakai fase capture agar
+       menangkap event error dari <img> sebelum browser menampilkan ikon rusak. */
+    document.addEventListener('error', function (e) {
+        var img = e.target;
+        if (!(img instanceof HTMLImageElement) || !img.hasAttribute('data-avatar-fallback')) return;
+        var wrap = img.parentElement;
+        if (wrap && wrap.classList.contains('avatar')) {
+            wrap.classList.add('avatar-fallback');
+            wrap.textContent = img.getAttribute('data-avatar-fallback');
+        }
+        img.remove();
+    }, true);
+
+    /* ---------- Sidebar: menu "Workspace Saya" bisa dilipat ---------- */
+    var wsGroup = document.getElementById('navWorkspaces');
+
+    if (wsGroup) {
+        var WS_KEY = 'tmSidebarWsOpen';
+
+        // Pulihkan posisi lipatan terakhir (default: terbuka)
+        try {
+            if (localStorage.getItem(WS_KEY) === '0') {
+                wsGroup.classList.remove('open');
+                var t0 = wsGroup.querySelector('[data-nav-group-toggle]');
+                if (t0) t0.setAttribute('aria-expanded', 'false');
+            }
+        } catch (err) { /* penyimpanan tidak tersedia: abaikan */ }
+
+        document.addEventListener('click', function (e) {
+            var toggle = e.target.closest('[data-nav-group-toggle]');
+            if (!toggle || !wsGroup.contains(toggle)) return;
+            var open = wsGroup.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            try { localStorage.setItem(WS_KEY, open ? '1' : '0'); } catch (err) { /* abaikan */ }
+        });
+    }
+
     /* ---------- Toast dari flash session server ---------- */
     document.querySelectorAll('[data-toast]').forEach(function (el) {
         window.tmToast(el.getAttribute('data-msg'), el.getAttribute('data-toast'));

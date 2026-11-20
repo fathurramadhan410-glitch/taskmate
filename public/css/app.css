@@ -179,6 +179,9 @@ code { font-family: 'Cascadia Code', Consolas, monospace; }
     border-radius: 999px;
 }
 
+/* varian badge cyan — dipakai menu SIAKAD & E-Learning */
+.nav-badge-cyan { background: var(--cyan-500); }
+
 .nav-item-ws { gap: 10px; }
 
 .nav-ws-dot {
@@ -196,6 +199,48 @@ code { font-family: 'Cascadia Code', Consolas, monospace; }
 
 .nav-ws-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nav-empty { color: rgba(255, 255, 255, .38); font-size: 12px; margin: 4px 10px; }
+
+/* ---------- Group menu yang bisa dilipat: "Workspace Saya" ---------- */
+.nav-group { margin-top: 16px; }
+
+.nav-group-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: calc(100% - 16px);
+    margin: 0 8px 6px;
+    padding: 2px 8px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: rgba(255, 255, 255, .45);
+    transition: color .15s;
+}
+
+.nav-group-toggle:hover { color: rgba(255, 255, 255, .8); }
+
+.nav-group-chevron {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    transition: transform .2s ease;
+}
+
+.nav-group.open .nav-group-chevron { transform: rotate(180deg); }
+
+.nav-group-list {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .22s ease;
+}
+
+.nav-group.open .nav-group-list { grid-template-rows: 1fr; }
+.nav-group-inner { overflow: hidden; min-height: 0; }
 
 .sidebar-foot { padding: 12px; border-top: 1px solid rgba(255, 255, 255, .1); }
 
@@ -700,6 +745,116 @@ input.input-mono { font-family: 'Cascadia Code', Consolas, monospace; letter-spa
     border-top: 1px solid var(--line);
 }
 
+/* ============================== PORTAL SIAKAD (HALAMAN) ============================== */
+
+.siakad-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    max-width: 920px;
+}
+
+.siakad-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 20px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F6FAFF 100%);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--text);
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+
+.siakad-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--blue-400);
+    box-shadow: var(--shadow-md);
+}
+
+.siakad-go {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: #EAF2FF;
+    color: var(--blue-600);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, color .15s, transform .15s;
+}
+
+.siakad-go .icon { width: 14px; height: 14px; }
+
+.siakad-card:hover .siakad-go {
+    background: var(--grad-brand);
+    color: #fff;
+    transform: translateX(2px);
+}
+
+.siakad-logo {
+    width: 100%;
+    height: 86px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    padding: 10px 12px;
+}
+
+.siakad-logo img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+
+.siakad-name { font-weight: 800; font-size: 16px; color: var(--navy-700); }
+
+.siakad-tag {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    border-radius: 999px;
+    padding: 3px 10px;
+}
+
+.siakad-tag.tag-cyan { background: rgba(0, 184, 217, .12); color: #0090A8; }
+.siakad-tag.tag-navy { background: rgba(22, 51, 127, .1); color: var(--navy-700); }
+
+.siakad-caption {
+    flex: 1;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--muted);
+}
+
+.siakad-url {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--blue-600);
+    background: #EAF2FF;
+    border-radius: 999px;
+    padding: 5px 11px;
+}
+
+.siakad-url .icon { width: 13px; height: 13px; }
+
+.siakad-info { max-width: 920px; margin-top: 18px; }
+.siakad-info > p { margin: 0 0 4px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+.siakad-footnote {
+    margin: 16px 0 0;
+    font-size: 11.5px;
+    color: var(--soft);
+}
+
 /* ============================== TOAST (kanan atas + ikon animasi) ============================== */
 
 .toast-wrap {
@@ -945,6 +1100,10 @@ input.input-mono { font-family: 'Cascadia Code', Consolas, monospace; letter-spa
     .form-row { grid-template-columns: 1fr; }
     .page-toolbar { flex-direction: column; align-items: stretch; }
     .toolbar-right { justify-content: flex-start; }
+    /* Item deadline: chip + info di baris 1, badge turun agar tidak terpotong layar sempit */
+    .tugas-aktif-item { flex-wrap: wrap; }
+    .tugas-aktif-item > .chip { flex: none; }
+    .tugas-aktif-item > .badge { margin-left: auto; flex: none; }
 }
 
 

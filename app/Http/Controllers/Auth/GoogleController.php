@@ -38,6 +38,12 @@ class GoogleController extends Controller
             ->first();
 
         if ($user) {
+            // Akun diblokir permanen oleh administrator — login Google pun ditolak
+            if ($user->isDiblokir()) {
+                return redirect()->route('login')->with('gagal', 'Akun Anda diblokir oleh administrator '
+                    .'dan tidak bisa dipakai untuk masuk. Silakan hubungi administrator TaskMate.');
+            }
+
             if ($user->terkunci_sampai && Carbon::now()->lt($user->terkunci_sampai)) {
                 return redirect()->route('login')->with('gagal', 'Akun Anda sedang dikunci sementara. Coba lagi setelah pukul '
                     .Carbon::parse($user->terkunci_sampai)->format('H:i').'.');

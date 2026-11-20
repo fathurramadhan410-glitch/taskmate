@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SiakadApp;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Models\WorkspaceMember;
@@ -14,6 +15,14 @@ class DashboardController extends Controller
     public function landing()
     {
         return view('landing');
+    }
+
+    /** Halaman SIAKAD & E-Learning: daftar aplikasi kampus aktif dari database */
+    public function siakad()
+    {
+        $apps = SiakadApp::where('aktif', true)->orderBy('urutan')->orderBy('nama')->get();
+
+        return view('siakad', compact('apps'));
     }
 
     /** FR-008: daftar workspace yang diikuti pengguna beserta perannya */

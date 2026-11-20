@@ -11,6 +11,7 @@ use Illuminate\Support\Carbon;
 /**
  * UC-01 / TMT-001: Registrasi dan login multiuser.
  * Termasuk FR-003: mengunci akun sementara setelah 5 kali gagal login.
+ * Tambahan: akun berstatus 'diblokir' (oleh administrator) tidak bisa login sama sekali.
  */
 class LoginController extends Controller
 {
@@ -33,8 +34,19 @@ class LoginController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        // Akun sedang terkunci (FR-003)
-        if ($user && $user->terkunci_sampai && Carbon::now()->lt($user->terkunci_sampai)) {
+        // Akun diblokir permanen oleh administrator
+        if ($user && $user->isDiblokir()) {
+            $pesan = 'Akun Anda diblokir oleh administrator dan tidak bisa dipakai untuk masuk.';
+
+            if ($user->blokir_alasan) {
+                $pesan .= ' Alasan: '.$user->blokir_alasan;
+            }
+
+            return back()->with('gagal', $pesan.' Silakan hubungi administrator TaskMate.');
+        }
+
+        // Akun sedang terkunci otomatis (FR-003)
+        if ($user && $user->isTerkunci()) {
             return back()->with('gagal', 'Akun Anda dikunci sementara karena terlalu banyak percobaan gagal. Coba lagi setelah pukul '
                 .Carbon::parse($user->terkunci_sampai)->format('H:i').'.');
         }
@@ -59,7 +71,8 @@ class LoginController extends Controller
                 $menit = (int) config('taskmate.lock_minutes', 15);
                 $user->forceFill(['terkunci_sampai' => Carbon::now()->addMinutes($menit), 'gagal_login' => 0])->save();
 
-                return back()->with('gagal', "Akun dikunci selama {$menit} menit karena {$batas} kali gagal login berturut-turut.");
+                return back()->with('gagal', "Akun dikunci selama {$menit} menit karena {$batas} kali gagal login berturut-turut. "
+                    .'Administrator TaskMate juga dapat membuka kunci akun Anda lebih cepat.');
             }
 
             $sisa = $batas - $user->gagal_login;

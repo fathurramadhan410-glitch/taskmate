@@ -42,6 +42,11 @@
                 @endif
             </a>
 
+            {{-- SIAKAD & E-Learning: halaman khusus daftar aplikasi kampus (Edlink Sevima & SIP Poliban) --}}
+            <a href="{{ route('siakad') }}" class="nav-item {{ nav_active('siakad') }}">
+                <x-icon name="grad"/><span>SIAKAD &amp; E-Learning</span>
+            </a>
+
             @if (isset($workspace) && $workspace)
                 <p class="nav-label" title="{{ $workspace->nama_workspace }}">{{ \Illuminate\Support\Str::limit($workspace->nama_workspace, 20) }}</p>
                 <a href="{{ route('workspace.show', $workspace) }}" class="nav-item {{ nav_active('workspace.show') }}">
@@ -58,16 +63,35 @@
                 </a>
             @endif
 
-            <p class="nav-label">Workspace Saya</p>
-            @forelse ($navWorkspaces as $w)
-                @php($isCurrent = isset($workspace) && $workspace && $workspace->id_workspace === $w->id_workspace)
-                <a href="{{ route('workspace.show', $w) }}" class="nav-item nav-item-ws {{ $isCurrent ? 'active' : '' }}">
-                    <span class="nav-ws-dot">{{ strtoupper(mb_substr($w->nama_workspace, 0, 1)) }}</span>
-                    <span class="nav-ws-name">{{ \Illuminate\Support\Str::limit($w->nama_workspace, 24) }}</span>
+            <div class="nav-group open" id="navWorkspaces">
+                <button type="button" class="nav-group-toggle" data-nav-group-toggle aria-expanded="true" aria-controls="navWorkspacesList">
+                    <span>Workspace Saya</span>
+                    <x-icon name="chevron-down" class="nav-group-chevron"/>
+                </button>
+                <div class="nav-group-list" id="navWorkspacesList">
+                    <div class="nav-group-inner">
+                        @forelse ($navWorkspaces as $w)
+                            @php($isCurrent = isset($workspace) && $workspace && $workspace->id_workspace === $w->id_workspace)
+                            <a href="{{ route('workspace.show', $w) }}" class="nav-item nav-item-ws {{ $isCurrent ? 'active' : '' }}">
+                                <span class="nav-ws-dot">{{ strtoupper(mb_substr($w->nama_workspace, 0, 1)) }}</span>
+                                <span class="nav-ws-name">{{ \Illuminate\Support\Str::limit($w->nama_workspace, 24) }}</span>
+                            </a>
+                        @empty
+                            <p class="nav-empty">Belum mengikuti workspace.</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            @if (auth()->user()->role === 'admin')
+                <p class="nav-label">Administrator</p>
+                <a href="{{ route('admin.akun') }}" class="nav-item {{ nav_active('admin.akun') }}">
+                    <x-icon name="users"/><span>Manajemen Akun</span>
                 </a>
-            @empty
-                <p class="nav-empty">Belum mengikuti workspace.</p>
-            @endforelse
+                <a href="{{ route('admin.siakad') }}" class="nav-item {{ nav_active('admin.siakad') }}">
+                    <x-icon name="box"/><span>Aplikasi SIAKAD</span>
+                </a>
+            @endif
         </nav>
 
         <div class="sidebar-foot">

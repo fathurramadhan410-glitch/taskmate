@@ -18,6 +18,9 @@ class User extends Authenticatable
         'password',
         'google_id',
         'avatar',
+        'role',
+        'status_akun',
+        'blokir_alasan',
     ];
 
     protected $hidden = [
@@ -75,6 +78,24 @@ class User extends Authenticatable
     public function isGoogleOnly(): bool
     {
         return is_null($this->password);
+    }
+
+    /** Peran sistem: 'admin' | 'anggota' */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /** Akun diblokir manual oleh administrator (tidak bisa login sampai dibuka) */
+    public function isDiblokir(): bool
+    {
+        return $this->status_akun === 'diblokir';
+    }
+
+    /** Akun terkunci otomatis karena gagal login berulang (FR-003) */
+    public function isTerkunci(): bool
+    {
+        return $this->terkunci_sampai !== null && now()->lt($this->terkunci_sampai);
     }
 
     public function getAvatarUrlAttribute(): ?string

@@ -57,6 +57,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/gabung-kode', [DashboardController::class, 'joinByCode'])
         ->middleware('throttle:6,1')->name('dashboard.gabung');
+
+    // Portal SIAKAD & E-Learning — halaman khusus daftar aplikasi kampus
+    // (Edlink Sevima & SIP Poliban). Sengaja DI LUAR grup workspace karena
+    // bersifat global seperti dashboard: tidak butuh parameter {workspace}.
+    Route::get('/siakad', [DashboardController::class, 'siakad'])->name('siakad');
+
     Route::post('/workspace', [WorkspaceController::class, 'store'])->name('workspace.store');
 
     Route::middleware('workspace.member')->prefix('/workspace/{workspace}')->group(function () {
@@ -103,4 +109,26 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profil/kata-sandi', [ProfileController::class, 'updatePassword'])->name('profil.password');
     Route::post('/profil/foto', [ProfileController::class, 'updateAvatar'])->name('profil.avatar');
     Route::delete('/profil', [ProfileController::class, 'destroy'])->name('profil.destroy');
+
+    /* =============================== ADMINISTRATOR =============================== */
+    // Catatan: grup admin lama berbasis AdminController DIHAPUS karena nama
+    // routenya duplikat dengan grup di bawah, sehingga URL /admin/akun bisa
+    // terkirim ke controller yang salah. Grup di bawah ini yang dipakai.
+
+    Route::middleware([\App\Http\Middleware\EnsureUserIsAdmin::class])
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+            Route::get('/akun', [\App\Http\Controllers\Admin\AkunController::class, 'index'])->name('akun');
+            Route::get('/akun/tambah', [\App\Http\Controllers\Admin\AkunController::class, 'create'])->name('akun.create');
+            Route::post('/akun', [\App\Http\Controllers\Admin\AkunController::class, 'store'])->name('akun.store');
+            Route::post('/akun/{user}/blokir', [\App\Http\Controllers\Admin\AkunController::class, 'blokir'])->name('akun.blokir');
+            Route::post('/akun/{user}/buka', [\App\Http\Controllers\Admin\AkunController::class, 'buka'])->name('akun.buka');
+            Route::get('/terblokir', [\App\Http\Controllers\Admin\AkunController::class, 'terblokir'])->name('terblokir');
+
+            Route::get('/siakad', [\App\Http\Controllers\Admin\SiakadAppController::class, 'index'])->name('siakad');
+            Route::post('/siakad', [\App\Http\Controllers\Admin\SiakadAppController::class, 'store'])->name('siakad.store');
+            Route::post('/siakad/{app}/update', [\App\Http\Controllers\Admin\SiakadAppController::class, 'update'])->name('siakad.update');
+            Route::post('/siakad/{app}/hapus', [\App\Http\Controllers\Admin\SiakadAppController::class, 'destroy'])->name('siakad.hapus');
+        });
 });

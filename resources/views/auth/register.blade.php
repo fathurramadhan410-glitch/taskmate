@@ -4,32 +4,72 @@
 
 @section('content')
 <div class="auth-split">
-    <div class="auth-side">
-        <div class="auth-side-inner">
-            <a href="{{ route('landing') }}" class="auth-side-logo">
+
+    {{-- ================= PANEL VISUAL (KIRI) ================= --}}
+    <aside class="auth-visual">
+        <div class="auth-visual-inner">
+            <a href="{{ route('landing') }}" class="av-brand">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo TaskMate">
+                <span>TaskMate</span>
+            </a>
+
+            <h2 class="av-title">
+                Satu akun untuk <em>semua jenjang</em>,
+                satu platform untuk semua kelompok
+            </h2>
+            <p class="av-sub">
+                Buat akun gratis dan langsung kelola workspace kelompokmu: pembagian jobdesk,
+                Kanban, repository draf ber-versi, sampai pengingat deadline otomatis.
+            </p>
+
+            <div class="av-photo-wrap">
+                <img src="{{ asset('images/auth-hero.png') }}"
+                     alt="Siswa-siswi Indonesia dari berbagai jenjang berkolaborasi mengerjakan tugas bersama"
+                     class="av-photo">
+
+                {{-- Chip: anggota bergabung (kecil, bagian atas) --}}
+                <div class="av-float av-chip av-chip-anggota" aria-hidden="true">
+                    <span class="av-chip-ico ico-green"><x-icon name="check-circle"/></span>
+                    <div>
+                        <b>Workspace siap!</b>
+                        <span>3 anggota sudah bergabung</span>
+                    </div>
+                </div>
+
+                {{-- Chip: QR undangan --}}
+                <div class="av-float av-chip av-chip-qr" aria-hidden="true">
+                    <span class="av-chip-ico ico-cyan"><x-icon name="qr"/></span>
+                    <div>
+                        <b>Undangan QR Code</b>
+                        <span>Scan langsung gabung workspace</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="av-footer">
+                <div class="av-ava-stack" aria-hidden="true">
+                    <span class="avs-1">D</span><span class="avs-2">A</span><span class="avs-3">B</span><span class="avs-4">+</span>
+                </div>
+                <p>
+                    Gratis untuk seluruh pelajar — <b>SMP, SMA/SMK</b>, dan <b>perguruan tinggi</b>.
+                    Bisa jadi Leader di satu workspace, Member di lainnya.
+                </p>
+            </div>
+        </div>
+        <div class="av-deco av-deco-1" aria-hidden="true"></div>
+        <div class="av-deco av-deco-2" aria-hidden="true"></div>
+    </aside>
+
+    {{-- ================= PANEL FORM (KANAN) ================= --}}
+    <main class="auth-panel">
+        <div class="auth-card">
+            <a href="{{ route('landing') }}" class="auth-logo">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo TaskMate">
             </a>
-            <h2>Satu Akun, Semua Kelompok</h2>
-            <p class="auth-side-sub">
-                Buat akun TaskMate dan kelola seluruh pekerjaan kelompok Anda: dari workspace,
-                pembagian jobdesk, Kanban, repository draf, sampai pengingat deadline otomatis.
-            </p>
-            <ul class="auth-side-points">
-                <li><x-icon name="check-circle"/> Gratis untuk seluruh mahasiswa</li>
-                <li><x-icon name="check-circle"/> Bisa jadi Leader di satu workspace, Member di lainnya</li>
-                <li><x-icon name="check-circle"/> Notifikasi lonceng + email pengingat</li>
-                <li><x-icon name="check-circle"/> Data berkas hanya bisa diakses anggota workspace</li>
-            </ul>
-            <p class="auth-side-tag"><x-icon name="clock"/> Cepat · Transparan · Terpantau</p>
-        </div>
-        <div class="auth-side-deco" aria-hidden="true"></div>
-    </div>
 
-    <div class="auth-panel">
-        <div class="auth-card">
             <div class="auth-head">
                 <h1>Buat Akun Baru</h1>
-                <p>Gratis dan hanya butuh satu menit.</p>
+                <p>Gratis, cepat, dan hanya butuh satu menit.</p>
             </div>
 
             <a href="{{ route('google.redirect') }}" class="btn btn-google btn-block" title="Daftar menggunakan akun Google">
@@ -37,7 +77,7 @@
                 Daftar dengan Google
             </a>
 
-            <div class="auth-divider"><span>atau daftar dengan email</span></div>
+            <div class="auth-divider"><span>atau daftar dengan Email</span></div>
 
             <form method="POST" action="{{ route('register.store') }}" class="auth-form">
                 @csrf
@@ -45,7 +85,7 @@
                     <label for="nama">Nama Lengkap</label>
                     <div class="input-icon">
                         <x-icon name="user"/>
-                        <input type="text" id="nama" name="nama" value="{{ old('nama') }}" required autofocus placeholder="cth: Fathur Ramadhan">
+                        <input type="text" id="nama" name="nama" value="{{ old('nama') }}" required autofocus placeholder="cth: Dimas Pratama">
                     </div>
                     @error('nama')<p class="field-error">{{ $message }}</p>@enderror
                 </div>
@@ -59,32 +99,41 @@
                     @error('email')<p class="field-error">{{ $message }}</p>@enderror
                 </div>
 
-                <div class="form-group">
-                    <label for="password">Kata Sandi</label>
-                    <div class="input-icon">
-                        <x-icon name="lock"/>
-                        <input type="password" id="password" name="password" required placeholder="Minimal 8 karakter" data-password-toggle>
-                        <button type="button" class="input-eye" aria-label="Tampilkan kata sandi"><x-icon name="eye"/></button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Kata Sandi</label>
+                        <div class="input-icon">
+                            <x-icon name="lock"/>
+                            <input type="password" id="password" name="password" required placeholder="Min. 8 karakter" data-password-toggle>
+                            <button type="button" class="input-eye" aria-label="Tampilkan kata sandi"><x-icon name="eye"/></button>
+                        </div>
+                        @error('password')<p class="field-error">{{ $message }}</p>@enderror
                     </div>
-                    @error('password')<p class="field-error">{{ $message }}</p>@enderror
+
+                    <div class="form-group">
+                        <label for="password_confirmation">Ulangi Kata Sandi</label>
+                        <div class="input-icon">
+                            <x-icon name="lock"/>
+                            <input type="password" id="password_confirmation" name="password_confirmation" required placeholder="Ulangi kata sandi">
+                        </div>
+                        @error('password_confirmation')<p class="field-error">{{ $message }}</p>@enderror
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="password_confirmation">Ulangi Kata Sandi</label>
-                    <div class="input-icon">
-                        <x-icon name="lock"/>
-                        <input type="password" id="password_confirmation" name="password_confirmation" required placeholder="Ulangi kata sandi">
-                    </div>
-                    @error('password_confirmation')<p class="field-error">{{ $message }}</p>@enderror
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg btn-block">Daftar Sekarang</button>
+                <button type="submit" class="btn btn-primary btn-lg btn-block auth-submit">Buat Akun TaskMate</button>
             </form>
 
             <p class="auth-alt">Sudah punya akun? <a href="{{ route('login') }}">Masuk di sini</a></p>
+
+            <p class="auth-legal">
+                Dengan mendaftar, kamu menyetujui Ketentuan Layanan &amp; Kebijakan Privasi TaskMate.
+            </p>
         </div>
 
         <a href="{{ route('landing') }}" class="auth-back"><x-icon name="chevron-left"/> Kembali ke halaman utama</a>
-    </div>
+
+        <p class="auth-dev">Dikembangkan oleh Kelompok 5 · Sistem Informasi Kota Cerdas — Politeknik Negeri Banjarmasin</p>
+    </main>
+
 </div>
 @endsection
