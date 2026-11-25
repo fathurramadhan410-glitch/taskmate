@@ -30,8 +30,17 @@
     }
 
     /* ---------- Toast (muncul di kanan atas) ---------- */
+    var TERAKHIR_TOAST = {};
+
     window.tmToast = function (pesan, type) {
         type = TOAST_JUDUL[type] ? type : 'info';
+
+        /* Pengaman anti-dobel: pesan & tipe sama dalam 1,5 detik hanya tampil sekali */
+        var kunci = type + '|' + (pesan || '');
+        var kini = Date.now();
+        if (TERAKHIR_TOAST[kunci] && kini - TERAKHIR_TOAST[kunci] < 1500) return;
+        TERAKHIR_TOAST[kunci] = kini;
+
         var durasi = type === 'gagal' ? 7000 : 5000;
 
         var wrap = document.querySelector('.toast-wrap');

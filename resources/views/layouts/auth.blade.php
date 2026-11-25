@@ -15,9 +15,8 @@
 <body class="auth-body">
     @yield('content')
 
-    @if (session('sukses'))<div data-toast="sukses" data-msg="{{ session('sukses') }}"></div>@endif
-    @if (session('gagal'))<div data-toast="gagal" data-msg="{{ session('gagal') }}"></div>@endif
-    @if (session('info'))<div data-toast="info" data-msg="{{ session('info') }}"></div>@endif
+    {{-- Pesan flash halaman auth (masuk/daftar) ditampilkan INLINE
+         di dalam form masing-masing — bukan lagi pop-up toast. --}}
 
     <script src="{{ asset('js/app.js') }}"></script>
     @stack('scripts')

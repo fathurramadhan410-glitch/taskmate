@@ -3,6 +3,28 @@
 @section('title', 'Masuk')
 
 @section('content')
+<style>
+    /* Pesan status login INLINE di dalam form (bukan pop-up).
+       Warna ditulis langsung agar tidak bergantung variabel CSS. */
+    .auth-alert {
+        display: flex; gap: 12px; align-items: flex-start;
+        padding: 14px 16px; border-radius: 14px; margin-bottom: 18px;
+        line-height: 1.6; animation: authAlertIn .3s ease;
+    }
+    .auth-alert .aa-ico {
+        flex: none; width: 34px; height: 34px; border-radius: 10px;
+        display: inline-flex; align-items: center; justify-content: center;
+    }
+    .auth-alert .aa-ico .icon { width: 16px; height: 16px; }
+    .auth-alert b { display: block; font-size: 13.5px; margin-bottom: 2px; }
+    .auth-alert p { font-size: 12.5px; margin: 0; }
+    .auth-alert.aa-merah { background: #FEF2F2; border: 1px solid #F2C4C4; }
+    .auth-alert.aa-merah .aa-ico { background: #F8D7D7; color: #B91C1C; }
+    .auth-alert.aa-merah b { color: #991B1B; }
+    .auth-alert.aa-merah p { color: #A34A4A; }
+    @keyframes authAlertIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+</style>
+
 <div class="auth-split">
 
     {{-- ================= PANEL VISUAL (KIRI) ================= --}}
@@ -81,6 +103,18 @@
 
             <form method="POST" action="{{ route('login.attempt') }}" class="auth-form">
                 @csrf
+
+                {{-- ===== Pesan kesalahan login: INLINE di dalam form ===== --}}
+                @if (session('gagal'))
+                    <div class="auth-alert aa-merah" role="alert">
+                        <span class="aa-ico"><x-icon name="alert"/></span>
+                        <div>
+                            <b>Login tidak berhasil</b>
+                            <p>{{ session('gagal') }}</p>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="form-group">
                     <label for="email">Email</label>
                     <div class="input-icon">

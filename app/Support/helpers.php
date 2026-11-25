@@ -5,6 +5,10 @@
 | Helper Global TaskMate
 |--------------------------------------------------------------------------
 | Fungsi bantu yang dipakai di Controller dan Blade.
+|
+| LANGKAH 39 — Perbaikan hak akses tombol status (FR-013):
+| kanban_moves() kini memakai pembanding (int) dan aturan member
+| diperjelas: hanya maju satu tahap, tidak boleh menetapkan Done.
 */
 
 use App\Models\Task;
@@ -145,9 +149,19 @@ if (! function_exists('nav_active')) {
 
 if (! function_exists('kanban_moves')) {
     /**
-     * Tombol perpindahan status yang boleh dilakukan pengguna pada kartu tugas.
-     * Aturan sesuai SRS FR-013: Member hanya maju satu tahap pada tugas miliknya
-     * (sampai Review), Leader dapat memindahkan semua tugas termasuk Done/mundur.
+     * Tombol perpindahan status yang BOLEH dilakukan pengguna pada kartu tugas.
+     *
+     * Aturan sesuai SRS FR-013 / FR-014:
+     * - Project Leader  : bebas memindahkan SEMUA tugas — maju, mundur,
+     *                     termasuk menetapkan Done.
+     * - Member          : hanya pada tugas MILIKNYA SENDIRI, hanya MAJU SATU
+     *                     TAHAP (To-Do -> In Progress -> Review) dan TIDAK
+     *                     BOLEH menetapkan Done (Done = persetujuan Leader).
+     * - Pengguna lain   : tidak mendapat tombol apa pun.
+     *
+     * Nilai 'forward' / 'back' berisi slug status tujuan, atau null bila
+     * tidak boleh — sehingga Blade cukup memakai @if untuk menyembunyikan
+     * tombol yang tidak berhak tampil.
      */
     function kanban_moves(Task $task, ?string $role, int $userId): array
     {
@@ -157,15 +171,20 @@ if (! function_exists('kanban_moves')) {
         $next = $nextMap[$task->status] ?? null;
         $prev = $prevMap[$task->status] ?? null;
 
+        // 1) Project Leader: semua tugas, maju & mundur, termasuk Done.
         if ($role === 'leader') {
             return ['forward' => $next, 'back' => $prev];
         }
 
-        if ($task->id_penanggung_jawab === $userId) {
-            // Member tidak boleh menetapkan Done
-            return ['forward' => ($next && $next !== 'done') ? $next : null, 'back' => null];
+        // 2) Member: hanya tugas milik sendiri, maju satu tahap, tanpa Done.
+        //    Pembanding (int) agar aman meski salah satu nilai keluar sebagai string.
+        if ((int) $task->id_penanggung_jawab === (int) $userId) {
+            $maju = ($next !== null && $next !== 'done') ? $next : null;
+
+            return ['forward' => $maju, 'back' => null];
         }
 
+        // 3) Bukan penanggung jawab: tanpa tombol apa pun.
         return ['forward' => null, 'back' => null];
     }
 }
@@ -209,7 +228,7 @@ if (! function_exists('file_icon')) {
             default => 'doc',
         };
     }
-
+}
 
 if (! function_exists('preview_type')) {
     /** Jenis pratinjau bawaan untuk sebuah ekstensi: 'pdf' | 'image' | null */
@@ -221,6 +240,4 @@ if (! function_exists('preview_type')) {
             default => null,
         };
     }
-}
-
 }

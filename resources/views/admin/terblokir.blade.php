@@ -24,11 +24,11 @@
                 @forelse($users as $user)
                     <tr>
                         <td>
-                            <div class="admin-akun-nama">{{ $user->name }}</div>
+                            <div class="admin-akun-nama">{{ $user->nama }}</div>
                             <div class="admin-akun-email">{{ $user->email }}</div>
                         </td>
                         <td>{{ $user->diblokir_pada ? \Carbon\Carbon::parse($user->diblokir_pada)->format('d M Y H:i') : '&mdash;' }}</td>
-                        <td>{{ $user->alasan_blokir ?? '&mdash;' }}</td>
+                        <td>{{ $user->alasan_blokir ?? ($user->terkunci_sampai ? 'Terkunci otomatis karena gagal login berulang' : '&mdash;') }}</td>
                         <td>
                             <form method="POST" action="{{ route('admin.akun.buka', $user) }}" onsubmit="return confirm('Buka blokir akun {{ $user->email }}?')">
                                 @csrf

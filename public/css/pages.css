@@ -486,9 +486,35 @@
     padding: 14px;
     margin-bottom: 16px;
 }
+/* Info detail tugas: 2 kolom tetap (2x2) — tiap item kartu putih sendiri,
+   teks deadline panjang melipat di dalam kartunya sendiri, tidak pernah menimpa kolom lain */
+.td-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    background: #F6F9FE;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 16px;
+}
+.td-meta > div {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    min-width: 0;
+    overflow: hidden;
+}
 .td-meta dt { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--soft); font-weight: 700; }
-.td-meta dd { margin: 4px 0 0; font-size: 13px; font-weight: 600; }
-.td-pj { display: flex; align-items: center; gap: 8px; }
+.td-meta dd { margin: 7px 0 0; font-size: 13px; font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+/* chip deadline yang panjang dibolehkan melipat 2 baris di dalam kartunya */
+.td-meta .chip { white-space: normal; line-height: 1.5; padding: 4px 10px; max-width: 100%; }
+.td-pj { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 560px) {
+    .td-meta { grid-template-columns: 1fr; }
+}
 
 .td-section { margin-bottom: 18px; }
 .td-section h4 {
@@ -1968,3 +1994,172 @@
     align-items: center;
     justify-content: center;
 }
+
+/* ===== Warna status Kanban (To-Do, In Progress, Review, Done) =====
+   Palet tegas & mudah terlihat: To-Do kuning amber, In Progress biru,
+   Review ungu, Done hijau. Dipakai chip, header kolom, kartu, dan badge. */
+.chip-todo, .kanban-col[data-kolom="todo"] {
+    --st: #F59E0B; --st-text: #B45309; --st-bg: #FEF3C7; --st-soft: #FFFBEB; --st-line-soft: #FCD34D; --st-ring: rgba(245, 158, 11, .28);
+}
+.chip-in_progress, .kanban-col[data-kolom="in_progress"] {
+    --st: #2563EB; --st-text: #1D4ED8; --st-bg: #DBEAFE; --st-soft: #EFF6FF; --st-line-soft: #93C5FD; --st-ring: rgba(37, 99, 235, .28);
+}
+.chip-review, .kanban-col[data-kolom="review"] {
+    --st: #8B5CF6; --st-text: #6D28D9; --st-bg: #EDE9FE; --st-soft: #F5F3FF; --st-line-soft: #C4B5FD; --st-ring: rgba(139, 92, 246, .28);
+}
+.chip-done, .kanban-col[data-kolom="done"] {
+    --st: #16A34A; --st-text: #15803D; --st-bg: #DCFCE7; --st-soft: #F0FDF4; --st-line-soft: #86EFAC; --st-ring: rgba(22, 163, 74, .28);
+}
+
+/* Chip status — tampil tegas: bingkai tebal warna status, titik & jumlah solid */
+.k-chip { background: var(--st-bg); border-color: var(--st-line-soft); color: var(--st-text); }
+.k-chip .k-dot { width: 11px; height: 11px; background: var(--st); box-shadow: 0 0 0 3px var(--st-ring); }
+.k-chip .k-count { background: var(--st); color: #fff; font-weight: 800; }
+.k-chip .k-chev { color: var(--st-text); }
+.k-chip:hover { border-color: var(--st); box-shadow: 0 0 0 3px var(--st-ring); }
+
+/* Chip saat kolomnya disembunyikan (klik chip): meredup jadi abu-abu */
+.k-chip.off { background: #F1F5F9; border-color: #CBD5E1; color: #64748B; box-shadow: none; }
+.k-chip.off .k-dot { background: #94A3B8; box-shadow: none; }
+.k-chip.off .k-count { background: #CBD5E1; color: #475569; }
+.k-chip.off .k-chev { color: #64748B; transform: rotate(-180deg); }
+
+/* Kolom status */
+.kanban-col { background: var(--st-soft); border-color: var(--st-line-soft); border-top: 4px solid var(--st); }
+.kc-head { background: var(--st-bg); border-bottom-color: var(--st-line-soft); }
+.kc-head .kc-title { color: var(--st-text); }
+.kc-head .k-dot { background: var(--st); }
+.kc-head .kc-count { background: var(--st); color: #fff; }
+.kanban-col .task-card { border-top: 3px solid var(--st); }
+
+/* Tombol tunggal di toolbar (samping Tambah Tugas): nama & ikon berubah
+   mengikuti kondisi papan — "Sembunyikan Semua" saat kolom tampil,
+   "Tampilkan Semua" saat semua disembunyikan. Hanya aksi sesi aktif:
+   tidak pernah tersimpan, setiap buka kanban semua kolom wajib tampil. */
+#btnKolomSemua { gap: 7px; }
+#btnKolomSemua .ic-show, #btnKolomSemua .lb-show { display: none; }
+#btnKolomSemua.is-show .ic-hide, #btnKolomSemua.is-show .lb-hide { display: none; }
+#btnKolomSemua.is-show .ic-show, #btnKolomSemua.is-show .lb-show { display: inline-flex; }
+#btnKolomSemua.is-show { color: var(--blue-600, #2F80ED); border-color: #BFD7F5; background: #F5F9FF; }
+
+/* Sorotan saat kartu ditarik melewati kolom (drag & drop) */
+.kc-body.drag-over { outline: 2px dashed #7FB3F3; outline-offset: -6px; border-radius: 12px; background: rgba(47, 128, 237, .07); }
+
+/* Papan kosong: muncul hanya jika user sendiri menyembunyikan semua kolom */
+.kanban-empty {
+    border: 1.5px dashed #C7D2E3;
+    border-radius: 14px;
+    background: #fff;
+    padding: 32px 20px;
+    text-align: center;
+    margin-bottom: 14px;
+}
+.kanban-empty p { margin: 0 0 6px; font-size: 13.5px; }
+.kanban-empty p.muted { font-size: 12.5px; margin-bottom: 14px; color: var(--soft); }
+.kanban-empty .btn { margin: 0 auto; }
+
+/* Badge status tugas (detail tugas, dashboard, riwayat) — selaras warna kolom */
+.badge.st-todo { background: #FEF3C7; color: #B45309; border: 1px solid #FCD34D; }
+.badge.st-in-progress { background: #DBEAFE; color: #1D4ED8; border: 1px solid #93C5FD; }
+.badge.st-review { background: #EDE9FE; color: #6D28D9; border: 1px solid #C4B5FD; }
+.badge.st-done { background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC; }
+
+/* ===================== LANGKAH 48 — revisi admin + login blokir ===================== */
+
+/* Toolbar tanpa judul ganda */
+.toolbar-count {
+    align-self: flex-end;
+    padding-bottom: 9px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+}
+.toolbar-end { justify-content: flex-end; }
+
+/* Kolom Gmail */
+.cell-mail { font-size: 12px; color: var(--muted); word-break: break-all; line-height: 1.5; display: inline-block; min-width: 205px; }
+
+/* Kolom WordPress yang Diikuti: nama penuh + peran dipisah */
+.wp-list { display: flex; flex-direction: column; gap: 7px; max-width: 330px; min-width: 190px; }
+.wp-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 8px 11px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #F7FAFF;
+}
+.wp-item .wp-nama {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--navy-700);
+    line-height: 1.55;
+    word-break: break-word;
+}
+.wp-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+.wp-role .icon { width: 11px; height: 11px; }
+.wp-role.role-lead { border: 1px solid #BDE7EF; background: #E8F7FA; color: #0E7E92; }
+.wp-role.role-member { border: 1px solid #CBDEFB; background: #EAF2FE; color: var(--blue-600); }
+.wp-empty { font-size: 12px; color: var(--soft); font-style: italic; }
+
+@media (max-width: 640px) {
+    .toolbar-count { align-self: flex-start; padding-bottom: 0; }
+}
+
+/* Pesan diblokir / terkunci pada form login (inline, bukan pop-up) */
+.auth-alert {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px 16px;
+    border-radius: 14px;
+    margin-bottom: 18px;
+    line-height: 1.6;
+    animation: authAlertIn .3s ease;
+}
+.auth-alert .aa-ico {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.auth-alert .aa-ico .icon { width: 16px; height: 16px; }
+.auth-alert b { display: block; font-size: 13.5px; margin-bottom: 2px; }
+.auth-alert p { font-size: 12.5px; margin: 0; }
+.auth-alert p b { display: inline; font-size: 12.5px; margin: 0; }
+.auth-alert .aa-alasan {
+    display: block;
+    margin-top: 9px;
+    padding: 7px 11px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, .78);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.55;
+}
+.auth-alert.aa-merah { background: var(--merah-bg); border: 1px solid #F2C4C4; }
+.auth-alert.aa-merah .aa-ico { background: #F8D7D7; color: #B91C1C; }
+.auth-alert.aa-merah b { color: #991B1B; }
+.auth-alert.aa-merah p { color: #A34A4A; }
+.auth-alert.aa-merah .aa-alasan { color: #991B1B; }
+.auth-alert.aa-kuning { background: var(--kuning-bg); border: 1px solid #EFDCA8; }
+.auth-alert.aa-kuning .aa-ico { background: #FBEBC4; color: #B45309; }
+.auth-alert.aa-kuning b { color: #92400E; }
+.auth-alert.aa-kuning p { color: #A16207; }
+.auth-alert.aa-kuning .aa-alasan { color: #92400E; }
+@keyframes authAlertIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
