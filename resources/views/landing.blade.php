@@ -51,7 +51,7 @@
         <div class="nav-mobile-cta">
             @guest
                 <a href="{{ route('login') }}" class="btn btn-light">Masuk</a>
-                <a href="{{ route('register') }}" class="btn btn-light">Daftar Gratis</a>
+                <a href="{{ route('register') }}" class="btn btn-light">Daftar</a>
             @endguest
             @auth
                 <a href="{{ route('dashboard') }}" class="btn btn-light">Buka Dashboard</a>
